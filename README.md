@@ -9,6 +9,7 @@ Send in less than 5s
 |:-----------------:|:-------------------------:|:------------:|:------------:|:---------------------:|
 |     Required      |         Required          |  Optionnal   |  Optionnal   |       Optionnal       |
 |   1 byte (0xA5)   |          1 byte           |    1 byte    | 0-255 bytes  |        1 byte         |
+
 --> Transmission order
 
 ### Command type

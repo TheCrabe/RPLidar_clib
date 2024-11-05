@@ -5,14 +5,14 @@
   * @author  LeCrabe
   * @brief   This file contains everything for the A2M8 RPLidar of Evolutek<<
   ******************************************************************************
-  */
+**/
+
 
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef INC_RPLIDAR_H_
 #define INC_RPLIDAR_H_
 
 #include <stdint.h>
-
 
 
 /******************************** PAQUET FIELDS *******************************/
@@ -79,7 +79,7 @@ typedef struct Info_Data {
 
 typedef struct Health_Data {
 	uint8_t status;		// O: Good, 1: Warning, 2: Error
-	uint8_t error[];	// related code for warning/error
+	uint8_t error[2];	// related code for warning/error
 } __attribute__((__packed__)) health_data;
 
 typedef struct Samplerate_Data {
@@ -87,27 +87,38 @@ typedef struct Samplerate_Data {
 	uint16_t Texpress;	// same but in EXPRESS_SCAN mode. In us
 } __attribute__((__packed__)) samplerate_data;
 
-typedef struct Lidar_conf_Data {
-	uint32_t type;		// configuration entry id
-	uint8_t payload[];	// configuration value
-} __attribute__((__packed__)) lidar_conf_data;
+// typedef struct Lidar_conf_Data {
+// 	uint32_t type;		// configuration entry id
+// 	uint8_t payload[];	// configuration value
+// } __attribute__((__packed__)) lidar_conf_data;
 
 
 /******************************** PAQUET FIELDS *******************************/
 
 
 
-/****************************** REQUEST FUNCTIONS *****************************/
-request new_req(UART_HandleTypeDef *huart, const uint8_t cmd);
-/****************************** REQUEST FUNCTIONS *****************************/
-
-
-
-/***************************** RESPONSE FUNCTIONS *****************************/
-descriptor get_res_descriptor(UART_HandleTypeDef *huart);
+/******************************* BASIC FUNCTIONS ******************************/
+descriptor new_req(UART_HandleTypeDef *huart, const uint8_t cmd);
 health_data get_res_data(UART_HandleTypeDef *huart);
-/***************************** RESPONSE FUNCTIONS *****************************/
+/******************************* BASIC FUNCTIONS ******************************/
 
+
+/******************************** COM FUNCTIONS *******************************/
+// No response
+int stop(UART_HandleTypeDef *huart);
+int reset(UART_HandleTypeDef *huart);
+
+// Multiple response
+// scan_data scan(UART_HandleTypeDef *huart);
+// scan_data force_scan(UART_HandleTypeDef *huart);
+// express_scan_data express_scan(UART_HandleTypeDef *huart);
+
+// Single response
+info_data get_info(UAUART_HandleTypeDef *huart);
+health_data get_health(UART_HandleTypeDef *huart);
+samplerate_data get_samplerate(UART_HandleTypeDef *huart);
+// lidar_conf_data get_lidar_conf(UART_HandleTypeDef *huart);
+/******************************** COM FUNCTIONS *******************************/
 
 
 #endif /* INC_RPLIDAR_H_ */
