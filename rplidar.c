@@ -11,6 +11,7 @@
 #include "rplidar.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 
 descriptor new_req(UART_HandleTypeDef *huart, const uint8_t cmd) {
 	request req;
@@ -42,8 +43,66 @@ int reset(UART_HandleTypeDef *huart) {
 }
 
 // Multiple response
-scan(UART_HandleTypeDef *huart) {
-	descriptor res_desc = new_req(&huart, SCAN);
+void scan(UART_HandleTypeDef *huart) {
+	enum state_scan state = DESCRIPTOR;
+
+	// TODO: Define scan_sample size
+	scan_data scan_sample[1000];
+	uint8_t index = 0;
+
+	while (state != EXIT) {
+		switch (state)
+		{
+		case DESCRIPTOR:
+			descriptor res_desc = new_req(&huart, SCAN);
+			if (res_desc.start_flag1 != '0xA5')
+				state = DESCRIPTOR;
+			else if (res_desc.start_flag2 != 'Ox5A')
+				state = DESCRIPTOR;
+			else if (res_desc.res_length_type != '0x05000040')
+				state = DESCRIPTOR;
+			else if (res_desc.type != '0x81')
+				state = DESCRIPTOR;
+			else
+				state = DATA;
+			break;
+		
+		case DATA:
+			scan_data data = get_scan(&huart);
+			bool S = CHECK_BIT(data.quality, 0);
+			bool S_ = CHECK_BIT(data.quality, 1);
+			bool C = CHECK_BIT(data.angle_q6, 0);
+			
+			// check value if _S, S and C
+			if (S_ == S || !C)
+				state = DESCRIPTOR;
+			// S = first data
+			else if (S) {
+				// TODO: Emit scan_sample
+				// TODO: reset scan_sample
+				index = 0;
+				scan_sample[index++] = data;
+			}
+			else if (!S)
+				scan_sample[index++] = data;
+			break;
+
+		case EXIT:
+			break;
+
+		default:
+			return;
+			break;
+		}
+
+	}
+}
+
+scan_data get_scan(UART_HandleTypeDef *huart) {
+	scan_data res_data;
+	HAL_UART_Receive(huart, (uint8_t *)&res_data, sizeof(res_data), 1000);
+	
+	return res_data;
 }
 // force_scan(UART_HandleTypeDef *huart) {
 	// descriptor res_desc = new_req(&huart, FORCE_SCAN);

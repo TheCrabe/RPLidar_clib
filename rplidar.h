@@ -37,6 +37,11 @@
 #define GET_SAMPLERATE 	0x59
 #define GET_LIDAR_CONF 	0x84	/* Payload */
 
+/* MACROS --------------------------------------------------------------------*/
+#define CHECK_BIT(var, pos) ((var) & (1<<(pos)))
+
+/* State Machines ------------------------------------------------------------*/
+enum state_scan { DESCRIPTOR, DATA, EXIT};
 
 /* Request packet format -----------------------------------------------------*/
 typedef struct Request {
@@ -109,7 +114,8 @@ int stop(UART_HandleTypeDef *huart);
 int reset(UART_HandleTypeDef *huart);
 
 // Multiple response
-// scan_data scan(UART_HandleTypeDef *huart);
+void scan(UART_HandleTypeDef *huart);
+scan_data get_scan(UART_HandleTypeDef *huart);
 // scan_data force_scan(UART_HandleTypeDef *huart);
 // express_scan_data express_scan(UART_HandleTypeDef *huart);
 
